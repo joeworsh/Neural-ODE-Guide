@@ -10,6 +10,22 @@ Equations: Machine Learning for Data-Driven Digital Engineering" which is
 currently in review for publication. The citation to the paper will be included
 here when the paper has been published.
 
+## References and Acknoledgements
+
+Much of the implementation was inspired by [`tfdiffeq`](https://github.com/titu1994/tfdiffeq)
+repository authored by [@titu1994](https://github.com/titu1994).
+
+The following articles contributed heavily to the developed theory and implementation:
+- Chen, Ricky TQ, et al. "Neural ordinary differential equations." Advances in neural
+information processing systems 31 (2018).
+- Dupont, Emilien, Arnaud Doucet, and Yee Whye Teh. "Augmented neural odes." Advances
+in neural information processing systems 32 (2019).
+- Massaroli, Stefano, et al. "Dissecting neural odes." Advances in Neural Information
+Processing Systems 33 (2020): 3952-3963.
+- Norcliffe, Alexander, et al. "On second order behaviour in augmented neural odes."
+Advances in neural information processing systems 33 (2020): 5911-5921.
+
+
 ## Example Problems
 
 ### Pendulum
