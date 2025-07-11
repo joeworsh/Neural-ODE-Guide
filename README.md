@@ -12,7 +12,7 @@ here when the paper has been published.
 
 If you find the paper or the code in this repository helpful, please cite
 this work with (TODO - will complete when accepted for publication):
-```{bibtex}
+```bibtex
 @article{worsham2025nodeguide,
   title={A Guide to Neural Ordinary Differential Equations: Machine Learning for Data-Driven Digital Engineering},
   author={Worsham, Joseph and Kalita, Jugal},
