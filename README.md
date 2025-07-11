@@ -10,6 +10,17 @@ Equations: Machine Learning for Data-Driven Digital Engineering" which is
 currently in review for publication. The citation to the paper will be included
 here when the paper has been published.
 
+If you find the paper or the code in this repository helpful, please cite
+this work with (TODO - will complete when accepted for publication):
+```{bibtex}
+@article{worsham2025nodeguide,
+  title={A Guide to Neural Ordinary Differential Equations: Machine Learning for Data-Driven Digital Engineering},
+  author={Worsham, Joseph and Kalita, Jugal},
+  year={2025}
+}
+```
+
+
 ## References and Acknoledgements
 
 Much of the implementation was inspired by [`tfdiffeq`](https://github.com/titu1994/tfdiffeq)
