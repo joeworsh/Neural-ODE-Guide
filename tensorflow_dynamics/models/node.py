@@ -71,7 +71,7 @@ class BaseNODE(tf.keras.Model):
         """
         x = self._encoder(x)
         xt_hat, *_ = self._solver(x, self._t_eval)
-        return self._decoder(xt_hat) if decode else xt_hat  # [..., n]
+        return self._decoder(xt_hat)  # [..., n]
 
 
 class NODE(BaseNODE):

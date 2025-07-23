@@ -140,7 +140,7 @@ def solve_fixed(func: Callable, y_0: Union[tf.Tensor, Tuple[tf.Tensor]],
         y_next, _ = step(solve_func, y, t, h)
         t_next = t + h
         valid = tf.where(h > 0, t_next < t_eval[..., -1], t_next > t_eval[..., -1])
-        y_next = tuple(tf.where(valid, y_next_n, y_n) for y_next_n, y_n in zip(y_next, y))
+        y_next = tuple(tf.where(valid[:, None], y_next_n, y_n) for y_next_n, y_n in zip(y_next, y))
         t_next = tf.where(valid, t_next, t)
         return y_next, t_next, h
 

@@ -39,9 +39,18 @@ Advances in neural information processing systems 33 (2020): 5911-5921.
 
 ## Example Problems
 
+### 1D Toy Problem
+
+A very simple 1D toy problem is presented as an example of how learned models converge
+throughout the learning process. The objective is to learn the function
+$f(x) = \frac{1}{x^2}\cos\left( 2 \pi x \right)$. The animation below shows how
+learning progresses over many training steps.
+
+![1d_problem](docs/1D_Fit_Animation.gif)
+
 ### Pendulum
 
-The first problem approached in the accompanying publication is the simple
+The simple physics problem approached in the accompanying publication is the simple
 [pendulum model](example_systems/pendulum/pendulum_system.py). A batch of
 pendulum trajectories on a phase plot is shown below:
 

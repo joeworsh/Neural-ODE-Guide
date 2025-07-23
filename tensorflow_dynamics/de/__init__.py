@@ -48,12 +48,12 @@ class OdeintSolver(tf.keras.Model):
     [2] Massaroli, Stefano, et al. "Dissecting neural odes."
     Advances in Neural Information Processing Systems 33 (2020): 3952-3963.
     """
-    def __init__(self, dy_dt: Callable, continuous_loss_func: Callable=None, method: str=None, options: Dict=None,
+    def __init__(self, dy_dt: tf.keras.Model, continuous_loss_func: Callable=None, method: str=None, options: Dict=None,
                  use_adjoint: bool=True, adjoint_method: str=None, adjoint_options: Dict=None):
         """Create a new OdeintSolver with the provided configuration.
 
         Args:
-            dy_dt (Callable): The dy/dt ODE.
+            dy_dt (tf.keras.Model): The dy/dt ODE.
             continuous_loss_func (Callable, optional): An optional continuous loss function that can accumulate continuously in y.
             method (str, optional): Indicates the integration method to use. Defaults to RK4.
             options (Dict, optional): Key value options to pass to the solver. Defaults to None.
@@ -61,7 +61,8 @@ class OdeintSolver(tf.keras.Model):
             adjoint_method (str, optional): The solver to use when computing the adjoint gradient. When None - use the forward solver.
             adjoint_options (Dict, optional): Key value options to pass to the adjoint solver. Defaults to options.
         """
-        super().__init__(autocast=False)
+        # super().__init__(autocast=False)
+        super().__init__()
         self._dy_dt = dy_dt
         self._continuous_loss_func = continuous_loss_func if continuous_loss_func is not None else self._zero_loss
         self._solver = ODE_SOLVERS.get(method, rk4_solver)
@@ -107,16 +108,17 @@ class OdeintSolver(tf.keras.Model):
             tf.Tensor: The time steps of the solution. Shape: [..., t].
             tf.Tensor: The continuous loss of the solution. Shape: [...]. Will be zeros if loss functions not provided.
         """
-        starting_loss = self._zero_loss(t_eval[..., 0], y_0)
-        aug_y_0 = tf.concat([y_0, starting_loss], axis=-1)  # [..., n+1]
+        # starting_loss = self._zero_loss(t_eval[..., 0], y_0)
+        # aug_y_0 = tf.concat([y_0, starting_loss], axis=-1)  # [..., n+1]
 
-        aug_y_t, t_t = self._solver(self._dynamics_with_loss, aug_y_0, t_eval, **self._options)
-        y_t = aug_y_t[..., :-1]
+        # aug_y_t, t_t = self._solver(self._dynamics_with_loss, aug_y_0, t_eval, **self._options)
+        # y_t = aug_y_t[..., :-1]
 
-        # compute the losses for this solution
-        y_loss = aug_y_t[..., -1]
+        # # compute the losses for this solution
+        # y_loss = aug_y_t[..., -1]
 
-        return y_t, t_t, y_loss
+        y_t, t_t = self._solver(self._dy_dt, y_0, t_eval, **self._options)
+        return y_t, t_t
 
     @tf.custom_gradient
     def odeint_adjoint(self, y_0: tf.Tensor, t_eval: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
