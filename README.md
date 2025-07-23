@@ -202,12 +202,11 @@ package which must be cloned and manually installed separately.
 ### Replicating Experiments
 
 The following notebooks were used to generate all results reported in the accompanying publication:
+- [`Simple 1D Experiment`](notebooks/Simple%201D%20Experiment.ipynb)
 - [`2D Nested Sphere Experiments v2.ipynb`](notebooks/2D%20Nested%20Sphere%20Experiments%20v2.ipynb)
 - [`Pendulum Experiments v2.ipynb`](notebooks/Pendulum%20Experiments%20v2.ipynb)
 
 Additional notebooks are provided for further examples and clarity:
-- [`NODE Continous Loss.ipynb`](notebooks/NODE%20Continuous%20Loss.ipynb): Shows how different models
-solve a linearly inseparable problem with continous loss terms.
 - [`NODE Latent Trajectories.ipynb`](notebooks/NODE%20Latent%20Trajectories.ipynb): Produces graphics
 and simple implementations of the 2D nested spheres problem.
 - [`NODE, ANODE and SONODE Studies.ipynb`](notebooks/NODE,%20ANODE%20and%20SONODE%20Studies.ipynb):
