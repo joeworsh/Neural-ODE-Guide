@@ -138,10 +138,9 @@ class OdeintSolver(tf.keras.Model):
         """
         # start by running the forward pass
         # stop the gradients from being built directly
-        y_t, t_t, y_loss = self.odeint(y_0, t_eval)  # [..., t, n], [..., t], [...]
+        y_t, t_t = self.odeint(y_0, t_eval)  # [..., t, n], [..., t], [...]
         y_t = tf.stop_gradient(y_t)  # [..., t, n]
         t_t = tf.stop_gradient(t_t)  # [..., t]
-        y_loss = tf.stop_gradient(y_loss)  # [...]
 
         # define the adjoint gradient of this ODE solution wrt the upstream dL_dy_f
         def grad(dL_dy_f: tf.Tensor, *_unused_grads, variables: List[tf.Tensor]=None) -> tf.Tensor:
@@ -150,8 +149,6 @@ class OdeintSolver(tf.keras.Model):
             
             # the gradient starts at the end of the original computation
             y_f = y_t[..., -1, :]  # [..., n]
-            y_f_loss = self._zero_loss(t_eval[..., -1], y_f)  # [..., 1]
-            yl_f = tf.concat([y_f, y_f_loss], axis=-1)
 
             # gather shapes that are needed
             self._n = y_f.shape[-1]
@@ -163,13 +160,13 @@ class OdeintSolver(tf.keras.Model):
             zero_params = tf.zeros(flat_params.shape, tf.float64)[None, :]  # [1, p]
 
             # construct the adjoint integrand and solve it
-            aug_y0 = tf.concat([yl_f, dL_dy_f[..., -1, :]], axis=-1)  # [..., 2n]
+            aug_y0 = tf.concat([y_f, dL_dy_f[..., -1, :]], axis=-1)  # [..., 2n]
             aug_y0 = (aug_y0, zero_params)
             backpass_t = tf.stack([t_eval[..., -1], t_eval[..., 0]], axis=-1)
-            y_aug, _ = self._adjoint_solver(self._augmented_dynamics_with_loss, aug_y0,
+            y_aug, _ = self._adjoint_solver(self._augmented_dynamics, aug_y0,
                                             backpass_t, **self._adjoint_options)
-            dL_dy_0 = y_aug[0][..., -1, self._n+1:]
-            returns = (dL_dy_0,) + tuple(None for _ in _unused_grads[:-1])  # TODO need to compute time gradients correctly
+            dL_dy_0 = y_aug[0][..., -1, self._n:]
+            returns = (dL_dy_0,) + tuple(None for _ in _unused_grads)  # TODO need to compute time gradients correctly
 
             # reconstruct parameter shapes correctly
             if variables is not None:
@@ -181,12 +178,12 @@ class OdeintSolver(tf.keras.Model):
                     dL_dparams.append(tf.reshape(dL_dp_flat, v.shape))
 
                 returns = (returns, dL_dparams)
-
+            
             self._n = None
             self._variables = None
             return returns
 
-        return (y_t, t_t, y_loss), grad
+        return (y_t, t_t), grad
 
     @tf.function
     def _dynamics_with_loss(self, t: tf.Tensor, y_aug: tf.Tensor) -> tf.Tensor:
@@ -201,6 +198,41 @@ class OdeintSolver(tf.keras.Model):
         dy_dt = self._dy_dt(t, y)  # [..., n]
         dl_dt = self._continuous_loss_func(t, y)  # [..., 1]
         return tf.concat([dy_dt, dl_dt], axis=-1)  # [..., n+1]
+    
+    @tf.function
+    def _augmented_dynamics(self, t: tf.Tensor, y_aug: tf.Tensor) -> tf.Tensor:
+        """Computing the gradient via the adjoint method requires
+        solving an augmented differential equations backwards in time.
+
+        This function defines the augmented, backwards ODE.
+
+        References:
+
+        [1] Massaroli, Stefano, et al. "Dissecting neural odes."
+        Advances in Neural Information Processing Systems 33 (2020): 3952-3963.
+
+        Args:
+            t (tf.Tensor): Time. Shape: [...].
+            y_aug (tf.Tensor): State. Shapes: [..., n'].
+
+        Returns:
+            tf.Tensor: dy / dt. Shape: [..., n'].
+        """
+        y = y_aug[0][..., :self._n]  # [..., n]
+        min_adj_y = -y_aug[0][..., self._n:]  # [..., n]
+
+        with tf.GradientTape(persistent=True) as tape:
+            tape.watch(y)
+            dy_dt = self._dy_dt(t, y)  # [..., n]
+
+        df_dy = tape.batch_jacobian(dy_dt, y,
+                                    unconnected_gradients=tf.UnconnectedGradients.ZERO)  # [..., n, n]
+        vjp_p = tape.gradient(dy_dt, self._variables,
+                              output_gradients=min_adj_y,  # output gradients automatically computes a vector-jacobian
+                              unconnected_gradients=tf.UnconnectedGradients.ZERO)  # tuple of [p']
+        vjp_p = tf.concat([tf.reshape(d, [-1,]) for d in vjp_p], axis=0)  # [p,]
+        vjp_y = (min_adj_y[..., None, :] @ df_dy)[..., 0, :]  # [..., n]
+        return (tf.concat([dy_dt, vjp_y], axis=-1), vjp_p[None, :])
 
     @tf.function
     def _augmented_dynamics_with_loss(self, t: tf.Tensor, y_aug: Tuple[tf.Tensor, tf.Tensor]) -> Tuple[tf.Tensor, tf.Tensor]:

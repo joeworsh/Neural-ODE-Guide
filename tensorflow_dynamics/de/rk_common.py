@@ -133,7 +133,7 @@ def fixed_rk_step(func: Callable, y_0: Tuple[tf.Tensor], t_0: tf.Tensor,
         k = tuple(tf.stack([k_n[j] for k_n in tableau.placeholders[:i]], axis=-1) for j in range(len(y_0)))
         k = tuple(tableau.rk_matrix[i, :i] * k_n for k_n in k)
         k = tuple(tf.reduce_sum(k_n, axis=-1) for k_n in k)
-        yi = tuple(y_0_n + dt * k_n for y_0_n, k_n in zip(y_0, k))
+        yi = tuple(y_0_n + dt[:, None] * k_n for y_0_n, k_n in zip(y_0, k))
         tableau.placeholders[i] = func(ti, yi)
 
     k = tuple(tf.stack([k_n[j] for k_n in tableau.placeholders], axis=-1) for j in range(len(y_0)))  # tuple of [..., n, s]
