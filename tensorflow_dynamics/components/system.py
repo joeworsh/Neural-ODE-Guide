@@ -9,9 +9,8 @@ class System(tf.keras.Model):
     Note: only additive noise is supported in tfd systems. Noise is not shown here,
     but must be integrated via SDEs or included in recursive estimations.
     """
-    def __init__(self, name: str) -> None:
+    def __init__(self) -> None:
         super().__init__(autocast=False)
-        self._name = name
 
     def call(self, x: tf.Tensor, u: tf.Tensor, p: tf.Tensor, t: tf.Tensor) -> tf.Tensor:
         """Invoke the system's dynamics and return the change in state x_dot.
@@ -41,10 +40,6 @@ class System(tf.keras.Model):
             tf.Tensor: x_dot to represent the change in state
         """
         raise NotImplementedError("All system must override the step function with custom dynamics.")
-
-    @property
-    def name(self):
-        return self._name
 
     @property
     def state_shape(self):

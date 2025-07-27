@@ -19,6 +19,6 @@ setup(
                       'pandas',
                       'scipy',
                       'tensorflow>=2.11.0',
-                      'tensorflow_probability>=0.19.0',
+                      'tensorflow_probability[tf]>=0.19.0',
                       'tqdm'],
 )
