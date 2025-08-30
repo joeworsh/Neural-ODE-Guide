@@ -13,10 +13,13 @@ here when the paper has been published.
 If you find the paper or the code in this repository helpful, please cite
 this work with (TODO - will complete when accepted for publication):
 ```bibtex
-@article{worsham2025nodeguide,
-  title={A Guide to Neural Ordinary Differential Equations: Machine Learning for Data-Driven Digital Engineering},
-  author={Worsham, Joseph and Kalita, Jugal},
-  year={2025}
+@article{worsham2025guide,
+  title={A guide to neural ordinary differential equations: Machine learning for data-driven digital engineering},
+  author={Worsham, Joseph M and Kalita, Jugal K},
+  journal={Digital Engineering},
+  pages={100060},
+  year={2025},
+  publisher={Elsevier}
 }
 ```
 
